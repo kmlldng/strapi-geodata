@@ -32,13 +32,13 @@ The **Strapi Location Picker** plugin lets you integrate a smooth and intuitive 
 
 ```sh
 # npm
-npm install strapi-location-picker
+npm install @kmlldng/strapi-location-picker
 
 # yarn
-yarn add strapi-location-picker
+yarn add @kmlldng/strapi-location-picker
 
 # pnpm
-pnpm install strapi-location-picker
+pnpm install @kmlldng/strapi-location-picker
 ```
 
 ## 🛠️ Configuration
@@ -131,3 +131,4 @@ Make sure the `required` value is true:
 This plugin is built upon existing work and contributions from the open-source community. Special thanks to previous developers and contributors whose work helped shape this plugin.
 
 - https://github.com/red-made/strapi-geodata
+- https://github.com/wisnuwiry/strapi-geodata

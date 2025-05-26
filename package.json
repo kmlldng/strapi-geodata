@@ -63,20 +63,20 @@
   },
   "strapi": {
     "kind": "plugin",
-    "name": "strapi-location-picker",
+    "name": "kmlldng-strapi-location-picker",
     "displayName": "Strapi Location Picker",
     "description": "Strapi plugin for selecting and searching locations with an interactive map picker."
   },
-  "name": "strapi-location-picker",
+  "name": "@kmlldng/strapi-location-picker",
   "description": "Strapi plugin for selecting and searching locations with an interactive map picker.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/wisnuwiry/strapi-geodata.git"
+    "url": "git+ssh://git@github.com/kmlldng/strapi-geodata.git"
   },
   "bugs": {
-    "url": "https://github.com/wisnuwiry/strapi-geodata/issues"
+    "url": "https://github.com/kmlldng/strapi-geodata/issues"
   },
-  "homepage": "https://github.com/wisnuwiry/strapi-geodata#readme",
-  "author": "Wisnu G. Saputra <wisnuwiry@gmail.com>"
+  "homepage": "https://github.com/kmlldng/strapi-geodata#readme",
+  "author": "kmlldng <kamalludinega@gmail.com>"
 }

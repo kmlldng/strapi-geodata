@@ -50,6 +50,21 @@ const Input: React.FC<InputProps> = ({ hint, labelAction, label, name, required,
 
   const searchRef = useRef<HTMLInputElement>(null);
 
+  const getCurrentLocation = useCallback(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          onSetLocation({ lat: latitude, lng: longitude });
+          map?.panTo({ lat: latitude, lng: longitude });
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+        }
+      );
+    }
+  }, [map]);
+
   const onMapClick = useCallback(
     (e: LeafletMouseEvent) => {
       let lat = parseFloat(e.latlng.lat.toString());
@@ -100,10 +115,13 @@ const Input: React.FC<InputProps> = ({ hint, labelAction, label, name, required,
           {label}
         </Field.Label>
 
-        <Box style={{ display: 'grid', gridTemplateColumns: '4fr 1fr', gap: '8px' }}>
+        <Box style={{ display: 'grid', gridTemplateColumns: '4fr 1fr 1fr', gap: '8px' }}>
           <TextInput ref={searchRef} name="search" placeholder="Address to search" />
           <Button onClick={searchLocation} size="l">
             Search
+          </Button>
+          <Button onClick={getCurrentLocation} size="l">
+            Current Location
           </Button>
         </Box>
 
