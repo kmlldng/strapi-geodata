@@ -1,14 +1,13 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMapEvent } from 'react-leaflet';
 import L from 'leaflet';
-import type { LatLngTuple, LeafletMouseEvent } from 'leaflet';
+import type { LatLngTuple, LeafletMouseEvent, Map } from 'leaflet';
 
 import { Box, Typography, JSONInput, TextInput, Button } from '@strapi/design-system';
 
 import 'leaflet/dist/leaflet.css';
-import { Field } from '@strapi/design-system';
+import { Field, Link } from '@strapi/design-system';
 import { useField } from '@strapi/strapi/admin';
-import { Accordion } from '@strapi/design-system';
 
 const iconUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png';
 const iconRetinaUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png';
@@ -43,27 +42,32 @@ const mapProps = {
   tileAccessToken: '',
 };
 
+// Component to handle map click events
+const MapClickHandler: React.FC<{ onMapClick: (e: LeafletMouseEvent) => void }> = ({ onMapClick }) => {
+  useMapEvent('click', onMapClick);
+  return null;
+};
+
 const Input: React.FC<InputProps> = ({ hint, labelAction, label, name, required, ...props }) => {
   const field = useField(name);
-  const [map, setMap] = useState<any>(null);
+  const mapRef = useRef<Map>(null);
   const [location, _setLocation] = useState<any>(props.value);
-
   const searchRef = useRef<HTMLInputElement>(null);
 
-  const getCurrentLocation = useCallback(() => {
+  const getCurrentLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
           onSetLocation({ lat: latitude, lng: longitude });
-          map?.panTo({ lat: latitude, lng: longitude });
+          mapRef.current?.panTo({ lat: latitude, lng: longitude });
         },
         (error) => {
           console.error('Error getting location:', error);
         }
       );
     }
-  }, [map]);
+  }
 
   const onMapClick = useCallback(
     (e: LeafletMouseEvent) => {
@@ -73,14 +77,6 @@ const Input: React.FC<InputProps> = ({ hint, labelAction, label, name, required,
     },
     []
   );
-
-  useEffect(() => {
-    if (!map) return;
-    map.on('contextmenu', onMapClick);
-    return () => {
-      map.off('contextmenu', onMapClick);
-    };
-  }, [map, onMapClick]);
 
   useEffect(() => {
     field.onChange(name, location);
@@ -96,7 +92,7 @@ const Input: React.FC<InputProps> = ({ hint, labelAction, label, name, required,
       let lat = parseFloat(data[0].lat);
       let lng = parseFloat(data[0].lon);
       onSetLocation({ lat, lng });
-      map.panTo({ lat, lng });
+      mapRef.current?.panTo({ lat, lng });
     }
   }
 
@@ -126,12 +122,11 @@ const Input: React.FC<InputProps> = ({ hint, labelAction, label, name, required,
         </Box>
 
         <Typography variant="pi" style={{ marginBottom, display, marginTop }}>
-          To set the location search for an address and press 'Search', or navigate on the map and
-          right-click
+          To set the location search for an address and press 'Search', or navigate on the map and click on the map.
         </Typography>
 
         <Box style={{ display: 'flex', height: '300px', width: '100%' }}>
-          <Box style={{ width: '100% ' }}>
+          <Box style={{ width: '100% ', position: 'relative' }}>
             <MapContainer
               zoom={mapProps.zoom}
               center={
@@ -139,7 +134,7 @@ const Input: React.FC<InputProps> = ({ hint, labelAction, label, name, required,
                   ? [props.value?.lat, props.value?.lng]
                   : (mapProps.center as LatLngTuple)
               }
-              ref={setMap}
+              ref={mapRef}
               style={{ height: '300px', zIndex: 299 }}
             >
               <TileLayer
@@ -148,31 +143,24 @@ const Input: React.FC<InputProps> = ({ hint, labelAction, label, name, required,
                 accessToken={mapProps.tileAccessToken}
               />
               {location && <Marker position={[location?.lat, location?.lng]} icon={customIcon} />}
+              <MapClickHandler onMapClick={onMapClick} />
             </MapContainer>
+            {location && (
+              <Link href={`https://maps.google.com/maps/place/${location?.lat},${location?.lng}`} target="_blank" style={{ backgroundColor: 'white', padding: '4px 8px', borderRadius: '4px', position: 'absolute', top: '8px', right: '8px', zIndex: 300, fontSize: '12px !important' }}>Open in Google Maps</Link>
+            )}
           </Box>
         </Box>
-
-        <Accordion.Root>
-          <Accordion.Item value={`acc-${name}`}>
-            <Accordion.Header>
-              <Accordion.Trigger description="Coordinate">Coordinate</Accordion.Trigger>
-            </Accordion.Header>
-            <Accordion.Content>
-              <JSONInput
-                disabled
-                name={props.name}
-                value={
-                  typeof field.value == 'object'
-                    ? JSON.stringify(field.value, null, 2)
-                    : field.value
-                }
-                onChange={(e: any) => onSetLocation(e)}
-                style={{ height: '9rem' }}
-              />
-            </Accordion.Content>
-          </Accordion.Item>
-        </Accordion.Root>
-
+        <JSONInput
+          disabled
+          name={props.name}
+          value={
+            typeof field.value == 'object'
+              ? JSON.stringify(field.value, null, 2)
+              : field.value
+          }
+          onChange={(e: any) => onSetLocation(e)}
+          style={{ height: '9rem' }}
+        />
         <Field.Hint />
         <Field.Error />
       </Box>
